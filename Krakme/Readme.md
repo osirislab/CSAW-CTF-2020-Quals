@@ -1,7 +1,7 @@
 ## CUDA Reversing Challenge
 
 Inspired by previous work on GPU-assisted malware such as: https://link.springer.com/article/10.1007/s10207-014-0262-9 why not make a GPU CTF challenge? </br>
-I am not sure if it's so easy or so hard, but if this fares well in the Quals, I have some cool ideas to make a sequel to this for the finals. </br>
+I am not sure if it's so easy or so hard, but if this fares well in the Quals, I have some cool ideas to make a sequel to this for the finals. File is a Win64 PE. </br>
 
 ### Writeup
 This challenge does not require us to run anything as everything needed is self-contained in the binary, also this not require a CUDA-runtime/Nvidia GPU to be solved. The binary is not stripped, looking at the code in Ghidra it would be obvious that cuda is involved and a check is run on the first arg passed to the program, where the check is inside a cuda kernel. </br>
