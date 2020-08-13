@@ -19,7 +19,7 @@
 static LIST_HEAD(ldw_rules);
 static DEFINE_RWLOCK(ldw_rules_lock);
 static DEFINE_SPINLOCK(ldw_ctl_lock);
-static int default_action = LDW_RES_DENY; 
+static int default_action = LDW_RES_DENY;
 
 static inline void _trim(char *str, const char *testing) {
   int total_len = strlen(str), top_len = strlen(testing);
@@ -40,7 +40,7 @@ static char* __resolve_path(const char *name, struct delayed_call *clean) {
   int res;
   struct path pout;
   char *out;
-  
+
   if (!name)
     return NULL;
 
@@ -49,7 +49,7 @@ static char* __resolve_path(const char *name, struct delayed_call *clean) {
     return ERR_PTR(res);
 
   out = kmalloc(PATH_MAX, GFP_KERNEL);
-  if (!out) 
+  if (!out)
     return ERR_PTR(-ENOMEM);
   set_delayed_call(clean, (void (*)(void*))kfree, out);
 
@@ -60,7 +60,7 @@ static char* __resolve_path(const char *name, struct delayed_call *clean) {
   return out;
 }
 
-static int __apply_rule(struct ldw_rule *cur, const char *name) 
+static int __apply_rule(struct ldw_rule *cur, const char *name)
 {
   DEFINE_DELAYED_CALL(clean_resname);
   char *resname = NULL;
@@ -101,7 +101,7 @@ static int __apply_rule(struct ldw_rule *cur, const char *name)
         goto clean;
       break;
     case LDW_RULE_MODE_SUFFIX:
-      if (!resname || filt_len >= name_len || 
+      if (!resname || filt_len >= name_len ||
           strcmp(cur_name, name + name_len - filt_len))
         goto clean;
       break;
@@ -111,7 +111,7 @@ static int __apply_rule(struct ldw_rule *cur, const char *name)
 
   if (filt & LDW_RULE_FILT_PERMIT)
     res = LDW_RES_ALLOW;
-  else 
+  else
     res = LDW_RES_DENY;
 
 clean:
@@ -120,14 +120,14 @@ clean:
 }
 
 // Must have lock set
-static int __ldw_rule_set_name(struct ldw_rule *r, const char __user *u_name, size_t size) 
+static int __ldw_rule_set_name(struct ldw_rule *r, const char __user *u_name, size_t size)
 {
   int len = strnlen_user(u_name, size);
   char *name;
 
   if (r->name_len < size) {
     name = kmalloc(size, GFP_KERNEL);
-    if (!name) 
+    if (!name)
       return -ENOMEM;
     r->name_len = size;
   } else {
@@ -139,7 +139,7 @@ static int __ldw_rule_set_name(struct ldw_rule *r, const char __user *u_name, si
     kfree(name);
     return -EFAULT;
   }
-  
+
   if (r->name != name) {
     kfree(r->name);
     r->name = name;
@@ -147,7 +147,7 @@ static int __ldw_rule_set_name(struct ldw_rule *r, const char __user *u_name, si
 
   if (len >= size)
     // Truncate the file name if too long
-    name[len - 1] = 0; 
+    name[len - 1] = 0;
   else
     // Otherwise zero out rest of string
     memset(name + len, 0, size - len);
@@ -176,18 +176,18 @@ static int ldw_from_user(struct ldw_rule *ret, struct ldw_rule_user __user *rule
   if (unlikely(filt_mode & ~LDW_RULE_FILT_MASK))
     return -EINVAL;
 
-  if (filt_mode & LDW_RULE_FILT_USER) { 
+  if (filt_mode & LDW_RULE_FILT_USER) {
     user = make_kuid(current_user_ns(), copy.tgtUser);
     if (!uid_valid(user))
       return -EINVAL;
   }
 
-  if (filt_mode & LDW_RULE_FILT_GROUP) { 
+  if (filt_mode & LDW_RULE_FILT_GROUP) {
     group = make_kgid(current_user_ns(), copy.tgtGroup);
     if (!gid_valid(group))
       return -EINVAL;
   }
-    
+
   switch (filt_mode & LDW_RULE_FILT_MODE) {
     case LDW_RULE_MODE_UNCOND:
       has_name = 0;
@@ -209,14 +209,14 @@ static int ldw_from_user(struct ldw_rule *ret, struct ldw_rule_user __user *rule
   else {
     if (ret->name)
       kfree(ret->name);
-    ret->name = NULL; 
+    ret->name = NULL;
     ret->name_len = 0;
   }
 
   return 0;
 }
 
-int ldw_check_file(const char *name) 
+int ldw_check_file(const char *name)
 {
   struct ldw_rule *cur;
   int rule_res, res = 0;
@@ -238,7 +238,7 @@ out:
   return res;
 }
 
-static int ldw_ctl_delete(struct ldw_rule **ptarget, 
+static int ldw_ctl_delete(struct ldw_rule **ptarget,
     struct ldw_rule_user __user *unused)
 {
   struct ldw_rule *target = *ptarget;
@@ -279,21 +279,21 @@ skip_pin:
   // Remove target from list
   target->added = 0;
   list_del(&target->rules);
-  __put_rule(target); 
+  __put_rule(target);
 
   write_unlock(&ldw_rules_lock);
 
   return end;
 }
 
-static int ldw_ctl_edit(struct ldw_rule **ptarget, 
-    struct ldw_rule_user __user *newrule) 
+static int ldw_ctl_edit(struct ldw_rule **ptarget,
+    struct ldw_rule_user __user *newrule)
 {
   struct ldw_rule *target = *ptarget;
   int err;
 
   printk("[*] ldw_ctl_edit()\n");
-  
+
   if (unlikely(!target))
     return -EINVAL;
   if (unlikely(!newrule))
@@ -301,13 +301,13 @@ static int ldw_ctl_edit(struct ldw_rule **ptarget,
 
   // Edit target in place
   write_lock(&ldw_rules_lock);
-  
+
   // Make sure this isn't a removed rule
   if (!target->added) {
     write_unlock(&ldw_rules_lock);
     return -EINVAL;
   }
-  
+
   err = ldw_from_user(target, newrule);
   if (unlikely(err < 0))
     return err;
@@ -317,8 +317,8 @@ static int ldw_ctl_edit(struct ldw_rule **ptarget,
   return 0;
 }
 
-static int ldw_ctl_get(struct ldw_rule **prule, 
-    struct ldw_rule_user __user *ret) 
+static int ldw_ctl_get(struct ldw_rule **prule,
+    struct ldw_rule_user __user *ret)
 {
   struct ldw_rule *rule = *prule;
   struct ldw_rule_user copy;
@@ -338,7 +338,7 @@ static int ldw_ctl_get(struct ldw_rule **prule,
   copy.filt_mode = rule->filt_mode;
   copy.tgtUser = from_kuid(current_user_ns(), rule->tgtUser);
   copy.tgtGroup = from_kgid(current_user_ns(), rule->tgtGroup);
-  
+
   if (copy.size - sizeof(copy) < rule->name_len)
     goto errRange;
 
@@ -362,8 +362,8 @@ errFault:
   return -EFAULT;
 }
 
-static int __ldw_ctl_insert_common(struct ldw_rule **ppivot_rule, int is_before, 
-    struct ldw_rule_user __user *rule) 
+static int __ldw_ctl_insert_common(struct ldw_rule **ppivot_rule, int is_before,
+    struct ldw_rule_user __user *rule)
 {
   int err;
   struct ldw_rule *insert, *pivot_rule = *ppivot_rule;
@@ -373,7 +373,7 @@ static int __ldw_ctl_insert_common(struct ldw_rule **ppivot_rule, int is_before,
   insert = __get_rule(NULL);
   if (unlikely(IS_ERR(insert)))
     return PTR_ERR(insert);
-  
+
   err = ldw_from_user(insert, rule);
   if (unlikely(err < 0)) {
     __put_rule(insert);
@@ -393,11 +393,11 @@ static int __ldw_ctl_insert_common(struct ldw_rule **ppivot_rule, int is_before,
 
   // Insert new rule
   insert->added = 1;
-  if (is_before) 
+  if (is_before)
     list_add_tail(&insert->rules, pivot);
   else
     list_add(&insert->rules, pivot);
-  
+
   // Move pointer to the insertion node
   __get_rule(insert);
   *ppivot_rule = insert;
@@ -408,37 +408,37 @@ static int __ldw_ctl_insert_common(struct ldw_rule **ppivot_rule, int is_before,
   return 0;
 }
 
-static int ldw_ctl_insert_before(struct ldw_rule **ppivot, struct 
+static int ldw_ctl_insert_before(struct ldw_rule **ppivot, struct
     ldw_rule_user __user *rule)
 {
   printk("[*] ldw_ctl_insert_before()\n");
   return __ldw_ctl_insert_common(ppivot, 1, rule);
 }
 
-static int ldw_ctl_insert_after(struct ldw_rule **ppivot, struct 
+static int ldw_ctl_insert_after(struct ldw_rule **ppivot, struct
     ldw_rule_user __user *rule)
 {
   printk("[*] ldw_ctl_insert_after()\n");
   return __ldw_ctl_insert_common(ppivot, 0, rule);
 }
 
-static int ldw_ctl_next(struct ldw_rule **pcur_rule, 
-    struct ldw_rule_user __user *xx) 
+static int ldw_ctl_next(struct ldw_rule **pcur_rule,
+    struct ldw_rule_user __user *xx)
 {
   struct ldw_rule *cur_rule = *pcur_rule;
   struct list_head *next;
 
   printk("[*] ldw_ctl_next()\n");
 
-  if (unlikely(xx)) 
+  if (unlikely(xx))
     return -EINVAL;
-  
+
   read_lock(&ldw_rules_lock);
 
   // Advance to next rule if any
   if (likely(cur_rule)) {
 
-    // Check if rule is stale. 
+    // Check if rule is stale.
     if (unlikely(!cur_rule->added)) {
       __put_rule(cur_rule);
       next = ldw_rules.next;
@@ -454,7 +454,7 @@ static int ldw_ctl_next(struct ldw_rule **pcur_rule,
     // Reset to the beginning, we have reached the end.
     next = ldw_rules.next;
   }
-  
+
   // Check if we loop back to head.
   if (unlikely(next == &ldw_rules)) {
     *pcur_rule = NULL;
@@ -469,23 +469,23 @@ static int ldw_ctl_next(struct ldw_rule **pcur_rule,
   }
 }
 
-static int ldw_ctl_prev(struct ldw_rule **pcur_rule, 
-    struct ldw_rule_user __user *xx) 
+static int ldw_ctl_prev(struct ldw_rule **pcur_rule,
+    struct ldw_rule_user __user *xx)
 {
   struct ldw_rule *cur_rule = *pcur_rule;
   struct list_head *prev;
 
   printk("[*] ldw_ctl_prev()\n");
 
-  if (unlikely(xx)) 
+  if (unlikely(xx))
     return -EINVAL;
-  
+
   read_lock(&ldw_rules_lock);
 
   // Advance to next rule if any
   if (likely(cur_rule)) {
 
-    // Check if rule is stale. 
+    // Check if rule is stale.
     if (unlikely(!cur_rule->added)) {
       __put_rule(cur_rule);
       prev = ldw_rules.prev;
@@ -501,7 +501,7 @@ static int ldw_ctl_prev(struct ldw_rule **pcur_rule,
     // Reset to the end, we have reached the beginning.
     prev = ldw_rules.prev;
   }
-  
+
   // Check if we loop back to head.
   if (unlikely(prev == &ldw_rules)) {
     *pcur_rule = NULL;
@@ -554,7 +554,7 @@ static int update_itr(struct ldw_itr *itr, loff_t pos)
 {
   struct list_head *lh;
   struct ldw_rule *cur_rule;
-    
+
   if (unlikely(!itr->cur)) {
     // User is still trying to iterate through this stale rule
     return -EINVAL;
@@ -585,7 +585,7 @@ static int update_itr(struct ldw_itr *itr, loff_t pos)
     itr->cur = lh;
     itr->cur_ind++;
     return 1;
-  } else 
+  } else
     // We might have to reset iterator here (rarely happens).
     return reset_itr(itr, pos);
 
@@ -600,7 +600,7 @@ static void *ldw_start(struct seq_file *m, loff_t *ppos)
 
   // Lock for read.
   read_lock(&ldw_rules_lock);
-  
+
   // Update iterator position.
   itr = m->private;
   err = update_itr(itr, *ppos - 1);
@@ -628,7 +628,7 @@ static void *ldw_next(struct seq_file *m, void *p, loff_t *ppos)
     return p;
 }
 
-static const char* const ldw_modes[] = {"uncond", "prefix", "match", 
+static const char* const ldw_modes[] = {"uncond", "prefix", "match",
   "prefdir", "suffix", "(???)", "(???)", "(???)"};
 
 static int ldw_show(struct seq_file *m, void *p)
@@ -646,8 +646,8 @@ static int ldw_show(struct seq_file *m, void *p)
     //Print the rule data
     flags = rule->filt_mode;
     seq_printf(m, "%-8s %-8s %08x %-8d %-8d %s\n", (flags & LDW_RULE_FILT_PERMIT
-          ? "PERMIT" : "DENY"), ldw_modes[flags & LDW_RULE_FILT_MODE], flags, 
-        from_kuid(current_user_ns(), rule->tgtUser), 
+          ? "PERMIT" : "DENY"), ldw_modes[flags & LDW_RULE_FILT_MODE], flags,
+        from_kuid(current_user_ns(), rule->tgtUser),
         from_kgid(current_user_ns(), rule->tgtGroup), rule->name);
   }
   return 0;
@@ -698,14 +698,14 @@ static const struct file_operations rules_ops = {
 
 static const char *num_modes[] = {"0\n", "1\n"};
 
-static int ldw_default_open(struct inode *inode, struct file *file) 
+static int ldw_default_open(struct inode *inode, struct file *file)
 {
   char* str = (char*)(num_modes[!!default_action]);
   printk("[*] Opened /proc/ldw/default_action\n");
   return single_open(file, seq_puts_i, str);
 }
 
-static ssize_t ldw_default_write(struct file *f, const char __user *buff, size_t s, 
+static ssize_t ldw_default_write(struct file *f, const char __user *buff, size_t s,
     loff_t * off)
 {
   char c;
@@ -721,7 +721,7 @@ static ssize_t ldw_default_write(struct file *f, const char __user *buff, size_t
   }
 
   // Ignore any additional writes.
-  return s; 
+  return s;
 }
 
 static const struct file_operations default_ops = {
@@ -737,9 +737,9 @@ static const struct file_operations default_ops = {
 //****************************************
 
 // Be nice and not make this const
-static int (*ldw_ctl_ops[])(struct ldw_rule **, 
+static int (*ldw_ctl_ops[])(struct ldw_rule **,
     struct ldw_rule_user __user *) = {
-  ldw_ctl_next, ldw_ctl_prev, ldw_ctl_edit, ldw_ctl_insert_after, 
+  ldw_ctl_next, ldw_ctl_prev, ldw_ctl_edit, ldw_ctl_insert_after,
   ldw_ctl_insert_before, ldw_ctl_delete, ldw_ctl_get
 };
 
@@ -760,7 +760,7 @@ static int ldw_ctl_close(struct inode *inode, struct file *file)
   struct ldw_rule *cur_rule;
 
   printk("[*] Closing /proc/ldw/ctl\n");
-  
+
   spin_lock(&ldw_ctl_lock);
   cur_rule = file->private_data;
   file->private_data = NULL;
@@ -782,7 +782,7 @@ static const struct file_operations ctl_ops = {
 // but I want to make it as difficult to implement. Let's just invent a new
 // system call!
 SYSCALL_HOOK3(ldw_ctl, int, fd, unsigned long, request,
-    struct ldw_rule_user __user*, arg) 
+    struct ldw_rule_user __user*, arg)
 {
   char buff[15], *name;
   struct file *f = fget(fd);
@@ -821,7 +821,7 @@ int ldw_init_proc_files(void)
     return -ENOMEM;
   if (unlikely(!proc_create("ctl", 00444, ldw_root, &ctl_ops)))
     return -ENOMEM;
-  
+
   printk("[+] /proc/ldw_rules initialized\n");
   return 0;
 }
