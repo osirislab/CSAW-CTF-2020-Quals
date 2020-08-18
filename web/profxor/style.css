@@ -1,0 +1,49 @@
+body{
+  background-color: #CDCDCD;
+  /*color: #0e6b0e;*/
+  font-family:monospace;
+}
+
+h2{
+  text-align: center;
+}
+
+h3{
+  text-align: center;
+}
+
+h4{
+  text-align: center;
+}
+
+form{
+  text-align: center;
+}
+
+.vert_pad{
+  margin-top: 11em;
+  margin-left: 12em;
+  margin-right: 12em;
+  margin-bottom: 9em;
+  padding: 8em;
+  background-color: white;
+}
+
+.button{
+  margin-top: 1em;
+}
+
+.box{
+  transform: scale(1.7);
+  margin-bottom: 0.5em;
+  background-color: #000000;
+  color: #20c20e;
+}
+
+#scary{
+  color:#ff0000;
+}
+
+foo{
+  text-align: center;
+}
