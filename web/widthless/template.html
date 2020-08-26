@@ -116,12 +116,19 @@ a{
 <body>
     <div class="grid-2">
     <div class="section-1">
+
         <i class="fas fa-code fa-5x white"></i>
-        <h2>Gary Host</h2>
-        <p>The Interwebs</p>
+
+        <h2> Gary Host </h2>
+
+        <p> The Interwebs </p>
+
         <a href="https://twitter.com/csaw_nyutandon"><i class="fab fa-twitter"></i></a>
+
         <a href="https://github.com/osirislab"><i class="fab fa-github"></i></a>
+
         <br>
+
         <form method="POST">
 			<br>
             <h3>Signup for my newsletter</h3>
@@ -129,7 +136,9 @@ a{
             {{ form.email() }}
             {{ form.submit() }}
         </form>
+
 		<br>
+
 		{% with messages = get_flashed_messages() %}
 			{% if messages %}
 				{% for message in messages %}
@@ -137,10 +146,64 @@ a{
 				{% endfor %}
 			{% endif %}
         {% endwith %}
+
     </div>
+
+    <!-- zwsp is fun! -->
+
     <div class="section-2">
+<h2>About</h2>
+    <p>  Roger Sandie Jones is a 18-year-old teenager who enjoys swimming, reading and baking. He is exciting and bright, but can also be very sneaky and a bit sneaky. </p>
+
+    <p> He is Japanese. He is currently at school. He has a severe phobia of ducks </p>
+
+    <p> Physically, Roger is in pretty good shape. He is average-height with walnut skin, black hair and brown eyes. </p>
+
+    <p> He grew up in a middle class neighbourhood. He was raised by his mother, his father having left when he was young. </p>
+
+    <p> Roger goes to Bessie Street School, where his favourite subjects are chemistry, biology and medicine. He loves his teacher Mrs Page but hates Ms Robinson whose interests include handing out extra homework. </p>
+
+    <p> He is currently single. His most recent romance was with a student called Nina Sapphire Hudson, who was the same age as him. They broke up because Nina got fed up of how Roger talked to people. </p>
+
+    <p> Roger's best friend is a teenager called Carol Knowles. They have a very firey friendship. He also hangs around with a teenager called Abbey Carr. They enjoy bridge together. </p>
+
+    <p> Lorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis quas sint et nihil iusto eius nostrum sit error, repellat optio quisquam! Magnam dolore iusto cumque. Nostrum error iste neque maiores. </p>
+
+        <h2>Skills</h2>
+
+    <p> Lorem ipsum dolor sit amet consectetur adipisicing elit. Reiciendis in maiores autem quidem obcaecati excepturi! Cupiditate eaque itaque magni voluptatibus neque nobis est dolor? Atque sunt minus ipsa asperiores. At.</p>
+
+    <p> Lorem ipsum dolor sit amet consectetur adipisicing elit. Reiciendis in maiores autem quidem obcaecati excepturi! Cupiditate eaque itaque magni voluptatibus neque nobis est dolor? Atque sunt minus ipsa asperiores. At.</p>
+
+    <p> Lorem ipsum dolor sit amet consectetur adipisicing elit. Reiciendis in maiores autem quidem obcaecati excepturi! Cupiditate eaque itaque magni voluptatibus neque nobis est dolor? Atque sunt minus ipsa asperiores. At.</p>
+
+    <p> Lorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis quas sint et nihil iusto eius nostrum sit error, repellat optio quisquam! Magnam dolore iusto cumque. Nostrum error iste neque maiores.</p>
+
+    <h2>Projects</h2>
+
+    <a href="#">Project 1</a>
+
+    <a href="#">Project 2</a>
+
+    <a href="#">Project 3</a>
+
+    <a href="#">Project 4</a>
+
+    <a href="#">Project 5</a>
+
+    <h2>Contact</h2>
+
+    <p>
+
+    myEmail@email.com
+
+    </p>
+
         {{ body | safe }}
+
     </div>
+
     </div>
-</body>
+    </body>
+
 </html>

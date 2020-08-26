@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 import re
-import bz2
+import gzip
 import base64
 import html
 import random
+import itertools
 import zwsp_steg
 
 import flask
@@ -19,7 +20,7 @@ FLAG = "flag{gu3ss_u_f0und_m3}"
 
 # password that gets encoded, compressed and encoded as zero-width characters again
 STAGE_ONE_PWD = "alm0st_2_3z"
-STAGE_TWO_PWD = "u_unh1d_m3!"
+STAGE_TWO_PWD = "u_unh1d_m3"
 
 
 class EmailForm(flask_wtf.FlaskForm):
@@ -37,19 +38,18 @@ class Injector:
         encoded_pwd_one = base64.b64encode(STAGE_ONE_PWD.encode("utf-8"))
         self.stage_one_pwd = zwsp_steg.encode(str(encoded_pwd_one))
 
-        # encode and compress, and then randomly distribute payload across corpus - harder!
-        encoded_pwd_two = base64.b64encode(STAGE_TWO_PWD.encode("utf-8"))
-        encoded_pwd_two = bz2.compress(encoded_pwd_two)
+        encoded_pwd_two = (b"gzip:" + gzip.compress(bytes(STAGE_TWO_PWD, "utf-8")))
         self.stage_two_pwd = zwsp_steg.encode(str(encoded_pwd_two))
+        print(len(self.stage_two_pwd))
 
 
-    def stage1(self, content) -> str:
+    def stage1(self) -> str:
         """
         Given raw HTML source, simply append the encoded password for the
         stage to the end of the rendered document.
         """
         form = EmailForm()
-        return flask.render_template(self.template_path, body=content, form=form) + self.stage_one_pwd
+        return flask.render_template(self.template_path, form=form) + self.stage_one_pwd
 
 
     def stage2(self, content) -> str:
@@ -62,11 +62,18 @@ class Injector:
         full_html = flask.render_template(self.template_path, body=content, form=form)
         html_lst = re.split(r"(\s+)", full_html)
 
+        is_style = False
+
         # queue up all the injectable spaces we can use
         positions = []
         for pos, val in enumerate(html_lst):
-            if " " in val:
-                positions += [pos]
+            if "style>" in val:
+                is_style = True if is_style is False else False
+                continue
+
+            if not is_style:
+                if " " in val:
+                    positions += [pos]
 
         for char, pos in zip(self.stage_two_pwd, positions):
             html_lst[pos] = " " + char
@@ -90,21 +97,7 @@ def stage1():
         else:
             flask.flash("Whoops, couldn't add, sorry!")
 
-
-    content = """
-    <h2>About</h2>
-    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis quas sint et nihil iusto eius nostrum sit error, repellat optio quisquam! Magnam dolore iusto cumque. Nostrum error iste neque maiores.</p>
-    <h2>Skills</h2>
-    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Reiciendis in maiores autem quidem obcaecati excepturi! Cupiditate eaque itaque magni voluptatibus neque nobis est dolor? Atque sunt minus ipsa asperiores. At.</p>
-    <h2>Projects</h2>
-    <a href="#">Project 1</a>
-    <a href="#">Project 2</a>
-    <a href="#">Project 3</a>
-    <a href="#">Project 4</a>
-    <a href="#">Project 5</a>
-    <h2>Contact</h2>
-    <p>myEmail@email.com</p>"""
-    return injector.stage1(content)
+    return injector.stage1()
 
 
 @app.route("/ahsdiufghawuflkaekdhjfaldshjfvbalerhjwfvblasdnjfbldf/<pwd>", methods=["GET", "POST"])
@@ -121,7 +114,13 @@ def stage2(pwd):
 
     # TODO: change up
     content= """
-    <p>Alright you almost got me!</p>
+<p>  T H A N K S  A L O T  H U M A N  T H I S  S I T E  I S  N O W  B R E A K I N G  D O W N.</p>
+<p>  T H A N K S  A L O T  H U M A N  T H I S  S I T E  I S  N O W  B R E A K I N G  D O W N.</p>
+<p>  T H A N K S  A L O T  H U M A N  T H I S  S I T E  I S  N O W  B R E A K I N G  D O W N.</p>
+<p>  T H A N K S  A L O T  H U M A N  T H I S  S I T E  I S  N O W  B R E A K I N G  D O W N.</p>
+<p>  T H A N K S  A L O T  H U M A N  T H I S  S I T E  I S  N O W  B R E A K I N G  D O W N.</p>
+<p>  T H A N K S  A L O T  H U M A N  T H I S  S I T E  I S  N O W  B R E A K I N G  D O W N.</p>
+<p>  T H A N K S  A L O T  H U M A N  T H I S  S I T E  I S  N O W  B R E A K I N G  D O W N.</p>
     """
     return injector.stage2(content)
 
