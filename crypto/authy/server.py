@@ -47,7 +47,7 @@ Unfortunately we have prohibited the use of frontend design in our intranet, so 
 
 /view
     DESCRIPTION:
-        View and decrypt the contents of a note stored on our government-sponsored AWS knockoff
+        View and decrypt the contents of a note stored on our government-sponsored server store
 
     GET PARAMS:
         :id: an ID that you can use to retrieve and decrypt the note.
@@ -56,11 +56,11 @@ Unfortunately we have prohibited the use of frontend design in our intranet, so 
     RETURN PARAMS:
         :message: the original unadultered message you stored on our service.
 
+
 RULES
-- We will be very upset if you send unwarranted API parameters >:(
-- we will also be very upset if you attempt to impersonate our glorious admin >:(
-- And we will most be upset if you are trying to read files you have no business reading >:(
+- Please do not set unwarranted API parameters >:(
 """
+
 
 @app.route("/new", methods=["POST"])
 def new():
@@ -87,18 +87,25 @@ def new():
         info.update(payload)
         info["entrynum"] = 783
 
+        # turn it back into a param string
+        infostr = ""
+        for pos, (key, val) in enumerate(info.items()):
+            infostr += "{}={}".format(key, val)
+            if pos != (len(info) - 1):
+                infostr += "&"
+
+        print(infostr)
+
+        # TODO: encrypt infostr with AES-CBC
+
         # generate an encoded ID from the payload
-        identifier = base64.b64encode(bytes(str(info), "utf-8"))
-
-        # TODO: encrypt the identifier with AES-CBC
-
-        print(str(info))
+        identifier = base64.b64encode(bytes(infostr, "utf-8"))
 
         # instantiate a hasher and generate a vulnerable MAC
         hasher = hashlib.sha1()
-        hasher.update((SECRET + str(info)).encode('utf-8'))
+        hasher.update((SECRET + infostr).encode('utf-8'))
         checksum = hasher.hexdigest()
-        return "Successfully added {}:{}\n".format(identifier, checksum)
+        return "Encrypting with secret of size {}...\nSuccessfully added {}:{}\n".format(len(SECRET), identifier, checksum)
 
 
 @app.route("/view", methods=["POST"])
@@ -112,17 +119,25 @@ def view():
         return ">:(\n"
     if "integrity" not in info.keys():
         return ">:(\n"
+    #if "password" not in info.keys():
+    #    return ">:(\n"
 
-    identifier = info["id"]
+    identifier = str(base64.b64decode(info["id"]).decode("ascii"))
     checksum = info["integrity"]
 
+    print(identifier)
+
     # rederive identifier dict
-    note_dict = ast.literal_eval(str(base64.b64decode(identifier).decode("ascii")))
+    params = identifier.replace("&", " ").split(" ")
+    note_dict = { param.split("=")[0]: param.split("=")[1]  for param in params }
+
+    print(note_dict)
 
     # check integrity
-    hasher = hashlib.sha1()
-    hasher.update((SECRET + str(note_dict)).encode('utf-8'))
+    hasher.update((SECRET + identifier).encode('utf-8'))
     gen_checksum = hasher.hexdigest()
+
+    print(checksum, gen_checksum)
 
     # return if failed integrity check
     if checksum != gen_checksum:
@@ -134,13 +149,27 @@ def view():
     try:
         entrynum = int(note_dict["entrynum"])
         if 0 <= entrynum <= 10:
-            if (note_dict["admin"] != True) and (note_dict["access_sensitive"] != True):
+            print("We getting sensitive...")
+
+            # both params must be set true to continue
+            if (note_dict["admin"] not in [True, "True"]):
+                return ">:(\n"
+            if (note_dict["access_sensitive"] not in [True, "True"]):
                 return ">:(\n"
 
+            # our entrynum == 7, and the two necessary params are set
             if (entrynum == 7):
-                return FLAG
+                return "You disobeyed our rules, but here's the note: " + FLAG + "\n"
+            else:
+                return "Hmmmmm...."
 
-    # IndexError, ...
+        # the entrynum is static, so just return the note stored on the ID
+        else:
+            return """Author: {}
+Note: {}\n""".format(note_dict["author"], note_dict["note"])
+
+
+    # IndexError, and other stuff that might break when iterating the dict
     except Exception:
         return ">:(\n"
 
