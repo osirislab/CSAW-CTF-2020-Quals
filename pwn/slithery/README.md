@@ -1,9 +1,13 @@
 ## slithery
 
-* __Category:__ - reversing
-* __Point Value__ - 100-200 range
+* __Category:__ - pwn
+* __Description:__ - Python sandbox that restricts commonly used payloads for escape. User must instead figure out from obfuscated source what dependency is being used (numpy), and use that in order to craft a specialized payload to cause a segmentation fault, which returns the flag.
 
-Python sandbox that restricts commonly used payloads for escape. User must instead figure out from obfuscated source what dependency is being used (numpy), and use that in order to craft a specialized payload to cause a segmentation fault, which returns the flag.
+```
+Setting up a new coding environment for my data science students. Some of them are l33t h4ck3rs that got RCE and crashed my machine a few times :(
+
+Can you help test this before I use it for my class?
+```
 
 ## Usage
 

@@ -1,6 +1,6 @@
-# AES modes
+# modus operandi
 
-**Description**: nc [server] 
+**Description**: nc [server]
 
 **Category**: Cryptography
 
