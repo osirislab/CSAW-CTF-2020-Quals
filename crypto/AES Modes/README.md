@@ -1,6 +1,6 @@
 # AES modes
 
-**Description**: nc <server> 
+**Description**: nc [server] 
 
 **Category**: Cryptography
 
