@@ -18,8 +18,9 @@ BUCKET_NAME = "ad586b62e3b5921bd86fe2efa4919208"
 # information we want to hide and disperse in the first bucket
 # if you are seeing this source code publicly, they probably don't work anymore :p
 TARGET_BUCKET = "s3://super-top-secret-dont-look"
+TARGET_PATH = ".sorry/.for/.nothing/"
 TARGET_ACCESS_KEY = "AKIAQHTF3NZUSQ62LEG2"
-TARGET_SECRET_KEY = "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"
+TARGET_SIGNATURE = "515ad736e5f2068b2605be97e2ced10e23fb993fbadcc697f522564e2e0d3386"
 
 
 def get_random_string(length):
@@ -47,10 +48,11 @@ def main():
     }
 
     # plant our metadata randomly throughout the first bucket
-    randkeys = [ random.choice(list(files.items()))[0] for _ in range(3) ]
+    randkeys = [ random.choice(list(files.items()))[0] for _ in range(4) ]
     files[randkeys[0]] = TARGET_BUCKET
-    files[randkeys[1]] = TARGET_ACCESS_KEY
-    files[randkeys[2]] = TARGET_SECRET_KEY
+    files[randkeys[1]] = TARGET_PATH
+    files[randkeys[2]] = TARGET_ACCESS_KEY
+    files[randkeys[3]] = TARGET_SIGNATURE
 
     # now upload everything! only readers that are authenticated can access these files
     print("Creating challenge bucket in S3")
@@ -64,8 +66,9 @@ def main():
     # write the location of the files with the information we hidden
     with open("solve.txt", "w") as fd:
         fd.write("Bucket Name: `{}`\n".format(randkeys[0]))
-        fd.write("Access Key: `{}`\n".format(randkeys[1]))
-        fd.write("Secret Key: `{}`\n".format(randkeys[2]))
+        fd.write("Path: `{}`\n".format(randkeys[1]))
+        fd.write("Access Key: `{}`\n".format(randkeys[2]))
+        fd.write("Signature: `{}`\n".format(randkeys[3]))
 
     print("Done!")
 
