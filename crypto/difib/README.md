@@ -2,12 +2,8 @@
 
 __Category__: Crypto
 
-__Point Value__: 50-100
-
-TODO: add some more bogus and garbage panagramss that aren't perfect
+__Description__: Easy crypto with classical bifid cipher. Filter out perfect pangrams and use to decrypt the following ciphertext
 
 ```
-Let's start off sweet and simple :)
-
-snbwmuotwodwvcywfgmruotoozaiwghlabvuzmfobhtywftopmtawyhifqgtsiowetrksrzgrztkfctxnrswnhxshylyehtatssukfvsnztyzlopsv
+Welcome to crypto. We start with the classics! Deliver the decrypted form of the message to the guard on your journey.
 ```

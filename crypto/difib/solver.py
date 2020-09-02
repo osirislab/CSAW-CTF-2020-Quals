@@ -16,7 +16,7 @@ REMOVE = [" ", ".", ",", "+", "-", ":", "@", "'", "!", "?", "j", "\n"]
 def main():
 
     # parse out each verse
-    with open("verses", "r") as fd:
+    with open("ramblings", "r") as fd:
         keystrings = fd.readlines()
 
     # filter and cleanup into a 25-char key
@@ -27,10 +27,9 @@ def main():
             key = key.replace(rm, "")
 
         # helps us catch characters we don't want
-        assert len(key) == 25
+        if len(key) != 25:
+            continue
         keys += [key]
-
-    # TODO: filter again once we add garbage to verses
 
     # take each cleaned up key and encrypt using Bifid cipher
     key = 5

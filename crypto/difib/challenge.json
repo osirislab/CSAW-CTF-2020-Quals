@@ -1,0 +1,7 @@
+{
+    "name": "difib",
+    "category": "crypto",
+    "description": "Welcome to crypto. We start with the classics! Deliver the decrypted form of the message to the guard on your journey.\n\n`nc {{.Netloc}} {{.DescPort}}`",
+    "points": 50,
+    "files": ["message", "ramblings"]
+}
