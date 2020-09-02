@@ -5,6 +5,8 @@ of my favorite rhythm game, Sound Voltex, free and open source online!!
 
 I even charted a new flag song too! Lets play some multiplayer :3
 
+Submitted by itszn from RET2 Systems
+
 **Handout**: handout/pwnvoltex.tar.gz
 
 **Category**: pwn / misc
