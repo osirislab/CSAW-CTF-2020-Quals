@@ -1,7 +1,7 @@
 {
     "name": "ezbreezy",
     "category": "rev",
-    "description": "Welcome to reversing! Prove your worth and get the flag from this neat little program!",
+    "description": "This binary has nothing to hide!",
     "points": 100,
-    "files": ["program.txt"]
+    "files": ["app"]
 }
