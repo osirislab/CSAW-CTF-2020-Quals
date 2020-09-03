@@ -1,0 +1,7 @@
+{
+    "name": "modus_operandi",
+    "category": "crypto",
+    "description": "Can't play CSAW without your favorite block cipher!\n\n`nc {{.Netloc}} {{.DescPort}}`",
+    "flag": "flag{ECB_re@lly_sUck$}",
+    "points": 100
+}
