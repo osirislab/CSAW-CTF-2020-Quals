@@ -1,0 +1,7 @@
+{
+    "name": "baby_mult",
+    "category": "rev",
+    "description": "Welcome to reversing! Prove your worth and get the flag from this neat little program!",
+    "points": 50,
+    "files": ["program.txt"]
+}
