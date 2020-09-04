@@ -1,0 +1,7 @@
+{
+    "name": "krakme",
+    "category": "rev",
+    "description": "x86 assembly? Pshh. I think I built myself a pretty uncrackable program, don't you think?",
+    "points": 150,
+    "files": ["krakme.exe"]
+}

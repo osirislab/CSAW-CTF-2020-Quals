@@ -4,9 +4,11 @@ Inspired by previous work on GPU-assisted malware such as: https://link.springer
 I am not sure if it's so easy or so hard, but if this fares well in the Quals, I have some cool ideas to make a sequel to this for the finals. File is a Win64 PE. </br>
 
 ### Writeup
+
 This challenge does not require us to run anything as everything needed is self-contained in the binary, also this not require a CUDA-runtime/Nvidia GPU to be solved. The binary is not stripped, looking at the code in Ghidra it would be obvious that cuda is involved and a check is run on the first arg passed to the program, where the check is inside a cuda kernel. </br>
 
 Knowing this, and after some searching it is expected that people eventually land here: https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html which describes how the cuda code is compiled in a fatbinary, inside the binary and then they just disassemble the PTX code [docs](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html) (the assembly code of GPU) revealing the check, which is also not complicated, and then they find out the flag to be "flag{m33t_m3_in_blips_n_ch3atz}", the source of kernel code is:
+
 ```c
     int cnt = 0;
     char key[31] = {0x66,0x6d,0x63,0x64,0x7f,0x68,0x35,0x34,0x7c,0x56,0x67,0x38,0x53,0x64,0x60,0x50,0x72,0x7d,0x7b,0x63,0x67,0x4a,0x78,0x48,0x7b,0x71,0x29,0x7a,0x68,0x67,0x63};
@@ -15,7 +17,7 @@ Knowing this, and after some searching it is expected that people eventually lan
         *result = -1;
         return;
     }
-   
+
     for (int i = 0; i < *size; i++) {
         if ((passwd[i] ^ i) == key[i]) {
             cnt++;
@@ -29,7 +31,9 @@ Knowing this, and after some searching it is expected that people eventually lan
     }
     return;
 ```
+
 What the players would see though would look like the following (which is the generated using CUDA nvdisasm tool): (here it is shortened)
+
 ```asm
 //--------------------- .text._Z11checkKernelPKcPKiPi --------------------------
 	.section	.text._Z11checkKernelPKcPKiPi,"ax",@progbits
