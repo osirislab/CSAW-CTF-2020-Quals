@@ -1,0 +1,8 @@
+{
+    "name": "grid",
+    "category": "pwn",
+    "description": "After millions of bugs, all my homies hate C.\n\n`nc {{.Netloc}} {{.DescPort}}`",
+    "flag": "flag{but_4ll_l4ngu4g3s_R_C:(}",
+    "points": 150,
+    "files": ["grid", "libc-2.27.so", "libstdc++.so.6.0.25"]
+}
