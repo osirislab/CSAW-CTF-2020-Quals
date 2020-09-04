@@ -1,0 +1,8 @@
+{
+    "name": "elemental",
+    "category": "pwn",
+    "description": "If I could rearrange the periodic table, I'd put U and I together.\n\n`nc {{.Netloc}} {{.DescPort}}`",
+    "flag": "flag{this_is_a_cry_for_help_im_failing_chem}",
+    "points": 150,
+    "files": ["elemental"]
+}
