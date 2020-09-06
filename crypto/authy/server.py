@@ -7,6 +7,7 @@ server.py
 """
 
 import struct
+import hashlib
 import base64
 import flask
 
@@ -144,7 +145,7 @@ def new():
         # sanitize payload with our stuff
         # - set `admin` and `access_sensitive` as False, user will need to append overrides
         # - set an entry number given the entry in the kv database, user will need to override as 7
-        info = {"admin": False, "access_sensitive": False }
+        info = {"admin": "False", "access_sensitive": "False" }
         info.update(payload)
         info["entrynum"] = 783
 
@@ -157,14 +158,14 @@ def new():
 
 	# convert to bytes for consumption
         infostr = infostr.encode()
-        print(infostr)
 
         # generate an encoded ID from the payload
-        identifier = base64.b64encode(infostr).decode("ascii")
+        identifier = base64.b64encode(infostr).decode()
 
         # instantiate a hasher and generate a vulnerable MAC
-        checksum = sha1(SECRET + infostr)
-        return "Encrypting with secret of size {}...\nSuccessfully added {}:{}\n".format(len(SECRET), identifier, checksum)
+        hasher = hashlib.sha1()
+        hasher.update(SECRET + infostr)
+        return "Successfully added {}:{}\n".format(len(SECRET), identifier, hasher.hexdigest())
 
 
 @app.route("/view", methods=["POST"])
@@ -181,15 +182,16 @@ def view():
     checksum = info["integrity"]
 
     # rederive identifier dict
-    params = identifier.replace("&", " ").split(" ")
+    params = identifier.replace('&', ' ').split(" ")
     note_dict = { param.split("=")[0]: param.split("=")[1]  for param in params }
 
     # check integrity
-    print(identifier.encode())
-    gen_checksum = sha1(SECRET + identifier.encode())
+    encode = base64.b64decode(info["id"]).decode('unicode-escape').encode('ISO-8859-1')
+    hasher = hashlib.sha1()
+    hasher.update(SECRET + encode)
+    gen_checksum = hasher.hexdigest()
 
     # return if failed integrity check
-    print(checksum, gen_checksum)
     if checksum != gen_checksum:
         return ">:(\n>:(\n>:(\n"
 
@@ -199,7 +201,6 @@ def view():
     try:
         entrynum = int(note_dict["entrynum"])
         if 0 <= entrynum <= 10:
-            print("We getting sensitive...")
 
             # both params must be set true to continue
             if (note_dict["admin"] not in [True, "True"]):
@@ -209,18 +210,19 @@ def view():
 
             # our entrynum == 7, and the two necessary params are set
             if (entrynum == 7):
-                return "You disobeyed our rules, but here's the note: " + FLAG + "\n"
+                return "\nAuthor: admin\nNote: You disobeyed our rules, but here's the note: " + FLAG + "\n\n"
             else:
                 return "Hmmmmm...."
 
         # the entrynum is static, so just return the note stored on the ID
         else:
-            return """Author: {}
-Note: {}\n""".format(note_dict["author"], note_dict["note"])
+            return """\nAuthor: {}
+Note: {}\n\n""".format(note_dict["author"], note_dict["note"])
 
 
     # IndexError, and other stuff that might break when iterating the dict
     except Exception:
         return ">:(\n"
 
-app.run()
+if __name__ == "__main__":
+    app.run()
