@@ -1,0 +1,7 @@
+{
+    "name": "authy",
+    "category": "crypto",
+    "description": "Check out this new storage application that your government has started! It's supposed to be pretty secure with AEAD...\n\n`curl {{.Netloc}} {{.DescPort}}`",
+    "flag": "flag{h4ck_th3_h4sh}",
+    "points": 150
+}
