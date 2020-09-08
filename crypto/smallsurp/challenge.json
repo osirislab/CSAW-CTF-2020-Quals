@@ -1,0 +1,7 @@
+{
+    "name": "smallsurp",
+    "category": "crypto",
+    "description": "\n\n[http://{{.Netloc}}:{{.DescPort}}](http://{{.Netloc}}:{{.DescPort}})",
+    "points": 200,
+    "flag": "flag{n0t_s0_s3cur3_4ft3r_4ll}"
+}
