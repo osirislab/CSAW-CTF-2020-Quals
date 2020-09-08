@@ -5,7 +5,6 @@ import hashlib
 import random
 
 import flask
-import flask_socketio as sio
 
 app = flask.Flask(__name__)
 app.config["SECRET_KEY"] = os.urandom(12)
@@ -87,7 +86,6 @@ app.jinja_env.globals.update(
 @app.route("/", methods=["GET", "POST"])
 def home():
     global SERVER_HMAC
-    print(DATABASE)
     if flask.request.method == "POST":
 
         # get username to identify entry in "database"
@@ -95,7 +93,6 @@ def home():
         if username is None:
             flask.flash("Error encountered on server-side.")
             return flask.redirect(flask.url_for("home"))
-
 
         # find entry given the username on our server-side
         try:
@@ -108,24 +105,22 @@ def home():
         hmac = flask.request.form.get("hmac")
         if (hmac is not None) and (SERVER_HMAC is not None):
 
-            print(hmac, SERVER_HMAC)
-
             # success! authenticated without the need for sending password
+            print(hmac, SERVER_HMAC)
             if hmac == SERVER_HMAC:
-                #return flask.redirect(flask.url_for("dash"))
-                return "Noice"
+                return flask.redirect(flask.url_for("dashboard", user=username, test="asd"))
             else:
                 flask.flash("Incorrect password.")
                 return flask.redirect(flask.url_for("home"))
 
         # client side should generate `A = g**a % N` and send instead of pwd
-        A = flask.request.form.get("a")
+        A = int(flask.request.form.get("a"))
         if A is None:
             flask.flash("Error encountered on server-side.")
             return flask.redirect(flask.url_for("home"))
 
         # block certain values of A to make it harder
-        if A in [str(N)]:
+        if A in [0, N]:
             flask.flash("Cannot find password for username in database")
             return flask.redirect(flask.url_for("home"))
 
@@ -140,7 +135,7 @@ def home():
         u = hasher(str(A) + str(B))
 
         # compute S and K
-        S = modular_pow(float(A) * modular_pow(v, u, N), b, N)
+        S = modular_pow(A * modular_pow(v, u, N), b, N)
         K = hashlib.sha256(str(S).encode()).digest()
 
         # compute the HM on the server end for comparison
@@ -152,11 +147,10 @@ def home():
         return flask.render_template("home.html")
 
 
-@app.route("/dash/<user>", methods=["POST"])
+@app.route("/dash/<user>", methods=["POST", "GET"])
 def dashboard(user):
     pwd = DATABASE[user]
-    encoded = base64.b64encode(bytes(pwd, "utf-8")).encode()
-    return flask.render_template("home.html", encoded=encoded)
+    return pwd
 
 
 if __name__ == "__main__":
