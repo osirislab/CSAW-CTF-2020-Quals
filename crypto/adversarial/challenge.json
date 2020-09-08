@@ -1,0 +1,8 @@
+{
+    "name": "adversarial",
+    "category": "crypto",
+    "description": "You have a new mission! Check the details in the assignment.\n\n`curl {{.Netloc}} {{.DescPort}}`",
+    "flag": "flag{m1ss1on_acc00mpl11shheedd!!}",
+    "points": 250,
+    "files": ["assignment.txt"]
+}

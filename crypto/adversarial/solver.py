@@ -46,5 +46,3 @@ for ind in range(shortest):
 
 for pt in pts:
     print(pt)
-
-print(key)
