@@ -1,0 +1,111 @@
+      IDENTIFICATION DIVISION.
+      PROGRAM-ID. WTF-COBOL.
+
+      ENVIRONMENT DIVISION.
+         INPUT-OUTPUT SECTION.
+         FILE-CONTROL.
+           SELECT RESPONSE ASSIGN TO OUT-FILE
+           ORGANIZATION IS LINE SEQUENTIAL
+           ACCESS MODE IS SEQUENTIAL
+           FILE STATUS RES-STATUS.
+
+      DATA DIVISION.
+       FILE SECTION.
+       FD RESPONSE.
+       01 RESLINE PIC X(128).
+
+         WORKING-STORAGE SECTION.
+       01 REQLINE PIC X(128).
+       01 EOF PIC A(1)  VALUE "N".
+       01 HEADER-LENGTH PIC 9(1) VALUE 0.
+
+       01 REQUEST.
+          05 HTTP-METHOD PIC X(32).
+          05 LOCATION PIC X(32).
+          05 PROTO PIC X(32).
+          05 HEADER-COUNT PIC 9(1) VALUE 1.
+          05 HEADER OCCURS 10 TIMES.
+             10 HEADER-KEY PIC X(32).
+             10 HEADER-VALUE PIC X(32).
+
+       01 LOCATION-WHITESPACE-IDX PIC 9(1) VALUE ZERO COMP-4.
+       01 LOCATION-LEN PIC 9(1).
+       01 INDEX-STR PIC X(10) VALUE "index.html".
+
+       01 RES-STATUS   PIC X(2).
+          88 RES-ALREADY-OPEN   VALUE '41'.
+
+      PROCEDURE DIVISION.
+       GO TO READ-IN.
+       STOP RUN.
+
+       READ-IN.
+           ACCEPT REQLINE.
+           UNSTRING REQLINE DELIMITED BY SPACE
+               INTO HTTP-METHOD, LOCATION, PROTO
+           END-UNSTRING.
+
+           PERFORM VARYING HEADER-COUNT
+               FROM 1 BY 1 UNTIL HEADER-COUNT = 5
+               OR HEADER-LENGTH = 1
+             ACCEPT REQLINE
+             INSPECT REQLINE TALLYING HEADER-LENGTH
+               FOR ALL CHARACTERS
+             UNSTRING REQLINE DELIMITED BY SPACE
+             INTO HEADER-KEY(HEADER-COUNT),
+                  HEADER-VALUE(HEADER-COUNT)
+             END-UNSTRING
+           END-PERFORM.
+
+           MOVE 0 TO LOCATION-WHITESPACE-IDX.
+           INSPECT LOCATION TALLYING LOCATION-WHITESPACE-IDX
+           FOR CHARACTERS BEFORE SPACE.
+
+           *> DISPLAY "METHOD: " HTTP-METHOD.
+           *> DISPLAY "PROTO: " PROTO.
+           *> DISPLAY "KEY: " HEADER-KEY(1).
+           *> DISPLAY "VALUE: " HEADER-VALUE(1).
+           *> DISPLAY "WHITESPACE: "  LOCATION-WHITESPACE-IDX.
+
+           INSPECT LOCATION
+           TALLYING LOCATION-LEN FOR ALL CHARACTERS.
+
+           IF LOCATION-LEN=0 THEN
+               STRING LOCATION DELIMITED BY SPACE
+               INDEX-STR DELIMITED BY SIZE
+               INTO LOCATION
+               END-STRING
+           END-IF.
+
+           *> DISPLAY "LOCATION: |" LOCATION(1:LOCATION-WHITESPACE-IDX) "|".
+           *> DISPLAY "LOC: " REQUEST-LOCATION.
+           *> DISPLAY "LEN: " LOCATION-LEN.
+
+           MOVE LOCATION(2:LOCATION-WHITESPACE-IDX) TO OUT-FILE.
+
+           OPEN INPUT RESPONSE.
+           IF RES-STATUS <> '00' THEN
+               DISPLAY "HTTP/1.1 404 NOT FOUND" X"0D"
+               *> DISPLAY "FILE-LOCATION: |" OUT-FILE "|" X"0D".
+               DISPLAY X"0D"
+               DISPLAY "404 NOT FOUND"
+               CLOSE RESPONSE
+               EXIT
+           END-IF.
+
+           DISPLAY "HTTP/1.1 200 OK" X"0D".
+           DISPLAY "Content-Type: text/html" X"0D".
+           DISPLAY "Connection: close" X"0D".
+           *> DISPLAY "FILE-LOCATION: " LOCATION X"0D".
+           DISPLAY X"0D".
+           *> DISPLAY X"0D".
+
+           MOVE 'N' TO EOF.
+           PERFORM UNTIL EOF='Y'
+               READ RESPONSE INTO RESLINE
+                   AT END MOVE 'Y' TO EOF
+                   NOT AT END DISPLAY RESLINE X"0D" WITH NO ADVANCING
+               END-READ
+           END-PERFORM
+
+           CLOSE RESPONSE.
