@@ -3,6 +3,6 @@
     "category": "pwn",
     "description": "With COVID all the arcades are closed :( Luckily there is a clone of my favorite rhythm game, Sound Voltex, free and open source online!!",
     "flag": "flag{even c++ is not safe from sqli :<<}",
-    "points": 250,
+    "points": 300,
     "files": ["handout/pwnvoltex.tar.gz"]
 }
