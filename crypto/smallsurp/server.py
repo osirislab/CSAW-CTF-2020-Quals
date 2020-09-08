@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+"""
+server.py
+
+    Serves the authentication portal and dashboard for player
+"""
 import os
 import base64
 import hashlib
@@ -6,21 +11,11 @@ import random
 
 import flask
 
+from gen_db import DATABASE
+
 app = flask.Flask(__name__)
 app.config["SECRET_KEY"] = os.urandom(12)
 
-# read flag from file
-with open("flag.txt", "r") as fd:
-    FLAG = list(fd.read())
-
-with open("database.txt", "r") as fd:
-    lines = fd.readlines()
-
-# instantiate database from incomplete database and portions of the flag
-DATABASE = {}
-for line in lines:
-    DATABASE[line.split(":")[0]] = base64.b64encode(bytes("".join(FLAG[0:3]), "utf-8")).decode("ascii")
-    FLAG = FLAG[3:]
 
 # NIST compliant prime number
 N = int("00ab76f585834c3c2b7b7b2c8a04c66571539fa660d39762e338cd8160589f08e3d223744cb7894ea6b424ebab899983ff61136c8315d9d03aef12bd7c0486184945998ff80c8d3d59dcb0196fb2c37c43d9cbff751a0745b9d796bcc155cfd186a3bb4ff6c43be833ff1322693d8f76418a48a51f43d598d78a642072e9fff533", 16)
@@ -102,19 +97,17 @@ def home():
             return flask.redirect(flask.url_for("home"))
 
         # if HMAC parameter is set, check instead and redirect
-        hmac = flask.request.form.get("hmac")
+        hmac = flask.request.form.get("computed")
         if (hmac is not None) and (SERVER_HMAC is not None):
-
-            # success! authenticated without the need for sending password
-            print(hmac, SERVER_HMAC)
-            if hmac == SERVER_HMAC:
-                return flask.redirect(flask.url_for("dashboard", user=username, test="asd"))
-            else:
-                flask.flash("Incorrect password.")
-                return flask.redirect(flask.url_for("home"))
+            return flask.redirect(flask.url_for("dashboard", user=username, hmac=hmac))
 
         # client side should generate `A = g**a % N` and send instead of pwd
-        A = int(flask.request.form.get("a"))
+        try:
+            A = int(flask.request.form.get("token1"))
+        except Exception:
+            flask.flash("Error encountered on server-side.")
+            return flask.redirect(flask.url_for("home"))
+
         if A is None:
             flask.flash("Error encountered on server-side.")
             return flask.redirect(flask.url_for("home"))
@@ -142,15 +135,26 @@ def home():
         SERVER_HMAC = hmac_sha256(K, salt.encode())
 
         # send back salt and B for client to use to compute HMAC
-        return flask.jsonify(salt=salt, B=B)
+        return flask.jsonify(nacl=salt, token2=B)
     else:
         return flask.render_template("home.html")
 
 
 @app.route("/dash/<user>", methods=["POST", "GET"])
 def dashboard(user):
+    if "hmac" not in flask.request.args:
+        flask.flash("Error encountered on server-side.")
+        return flask.redirect(flask.url_for("home"))
+
+    # get hmac and compare with server generated hmac
+    hmac = flask.request.args["hmac"]
+    if hmac != SERVER_HMAC:
+        flask.flash("Incorrect password.")
+        return flask.redirect(flask.url_for("home"))
+
+    # retrieve and display password
     pwd = DATABASE[user]
-    return pwd
+    return flask.render_template("dashboard.html", username=user, pwd=pwd)
 
 
 if __name__ == "__main__":

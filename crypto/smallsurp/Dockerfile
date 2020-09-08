@@ -4,7 +4,7 @@ RUN apt-get install -y python python-pip
 
 COPY requirements.txt .
 
-RUN pip install -r requirements.txt
+RUN pip install pycryptodome
 RUN pip install gunicorn
 
 COPY . /chal
