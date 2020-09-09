@@ -1,0 +1,8 @@
+{
+  "name": "flask_caching",
+  "category": "web",
+  "description": " \n\n[](http://)",
+  "points": 300,
+  "flag": "flag{f1@sK_10rD}",
+  "files": "app.py"
+}
