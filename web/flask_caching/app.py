@@ -8,16 +8,12 @@ import jinja2
 import os
 
 app = Flask(__name__)
-app.config['CACHE_REDIS_HOST'] = 'redis'
-app.config['DEBUG'] = True
+app.config['CACHE_REDIS_HOST'] = 'localhost'
+app.config['DEBUG'] = False
 
 cache = Cache(app, config={'CACHE_TYPE': 'redis'})
 redis = Redis('redis')
 jinja_env = jinja2.Environment(autoescape=['html', 'xml'])
-
-
-def python3_actual_decode(a):
-    return b''.join(bytes([ord(i)]) for i in a)
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -40,17 +36,18 @@ def notes_post():
     if title is None or content is None:
         return 'Missing fields', 400
 
+    title = title.replace('flask_cache_view//', '')  # Webscale filtering
     content = content.stream.read()
+
     if len(title) > 100 or len(content) > 256:
         return 'Too long', 400
 
-    redis.set(name=title, value=content)
+    redis.setex(name=title, value=content, timeout=30)  # Note will only live for max 30 seconds
 
     return redirect(os.path.join('/view/', title))
 
 
 @app.route('/view/<path:title>')
-@cache.memoize(timeout=30)
 def notes_view(title):
     content = redis.get(title)
 
@@ -60,36 +57,226 @@ def notes_view(title):
     ''').render(title=title, content=content)
 
 
+# This caching stuff is cool! Lets make a bunch of cached functions.
+
 @cache.cached(timeout=3)
-def _test():
+def _test0():
+    return 'test'
+@app.route('/test0')
+def test0():
+    _test0()
     return 'test'
 @cache.cached(timeout=3)
-def _ping():
-    return 'ping'
-@cache.cached(timeout=3)
-def _pong():
-    return 'pong'
-@cache.cached(timeout=3)
-def _hello_there():
-    return '...General Kenobi!'
-
-
-@app.route('/test')
-def test():
-    _test()
+def _test1():
     return 'test'
-@app.route('/ping')
-def ping():
-    _ping()
-    return 'pong'
-@app.route('/pong')
-def pong():
-    _pong()
-    return 'ping'
-@app.route('/hello_there')
-def hello_there():
-    _hello_there()
-    return '...General Kenobi!'
+@app.route('/test1')
+def test1():
+    _test1()
+    return 'test'
+@cache.cached(timeout=3)
+def _test2():
+    return 'test'
+@app.route('/test2')
+def test2():
+    _test2()
+    return 'test'
+@cache.cached(timeout=3)
+def _test3():
+    return 'test'
+@app.route('/test3')
+def test3():
+    _test3()
+    return 'test'
+@cache.cached(timeout=3)
+def _test4():
+    return 'test'
+@app.route('/test4')
+def test4():
+    _test4()
+    return 'test'
+@cache.cached(timeout=3)
+def _test5():
+    return 'test'
+@app.route('/test5')
+def test5():
+    _test5()
+    return 'test'
+@cache.cached(timeout=3)
+def _test6():
+    return 'test'
+@app.route('/test6')
+def test6():
+    _test6()
+    return 'test'
+@cache.cached(timeout=3)
+def _test7():
+    return 'test'
+@app.route('/test7')
+def test7():
+    _test7()
+    return 'test'
+@cache.cached(timeout=3)
+def _test8():
+    return 'test'
+@app.route('/test8')
+def test8():
+    _test8()
+    return 'test'
+@cache.cached(timeout=3)
+def _test9():
+    return 'test'
+@app.route('/test9')
+def test9():
+    _test9()
+    return 'test'
+@cache.cached(timeout=3)
+def _test10():
+    return 'test'
+@app.route('/test10')
+def test10():
+    _test10()
+    return 'test'
+@cache.cached(timeout=3)
+def _test11():
+    return 'test'
+@app.route('/test11')
+def test11():
+    _test11()
+    return 'test'
+@cache.cached(timeout=3)
+def _test12():
+    return 'test'
+@app.route('/test12')
+def test12():
+    _test12()
+    return 'test'
+@cache.cached(timeout=3)
+def _test13():
+    return 'test'
+@app.route('/test13')
+def test13():
+    _test13()
+    return 'test'
+@cache.cached(timeout=3)
+def _test14():
+    return 'test'
+@app.route('/test14')
+def test14():
+    _test14()
+    return 'test'
+@cache.cached(timeout=3)
+def _test15():
+    return 'test'
+@app.route('/test15')
+def test15():
+    _test15()
+    return 'test'
+@cache.cached(timeout=3)
+def _test16():
+    return 'test'
+@app.route('/test16')
+def test16():
+    _test16()
+    return 'test'
+@cache.cached(timeout=3)
+def _test17():
+    return 'test'
+@app.route('/test17')
+def test17():
+    _test17()
+    return 'test'
+@cache.cached(timeout=3)
+def _test18():
+    return 'test'
+@app.route('/test18')
+def test18():
+    _test18()
+    return 'test'
+@cache.cached(timeout=3)
+def _test19():
+    return 'test'
+@app.route('/test19')
+def test19():
+    _test19()
+    return 'test'
+@cache.cached(timeout=3)
+def _test20():
+    return 'test'
+@app.route('/test20')
+def test20():
+    _test20()
+    return 'test'
+@cache.cached(timeout=3)
+def _test21():
+    return 'test'
+@app.route('/test21')
+def test21():
+    _test21()
+    return 'test'
+@cache.cached(timeout=3)
+def _test22():
+    return 'test'
+@app.route('/test22')
+def test22():
+    _test22()
+    return 'test'
+@cache.cached(timeout=3)
+def _test23():
+    return 'test'
+@app.route('/test23')
+def test23():
+    _test23()
+    return 'test'
+@cache.cached(timeout=3)
+def _test24():
+    return 'test'
+@app.route('/test24')
+def test24():
+    _test24()
+    return 'test'
+@cache.cached(timeout=3)
+def _test25():
+    return 'test'
+@app.route('/test25')
+def test25():
+    _test25()
+    return 'test'
+@cache.cached(timeout=3)
+def _test26():
+    return 'test'
+@app.route('/test26')
+def test26():
+    _test26()
+    return 'test'
+@cache.cached(timeout=3)
+def _test27():
+    return 'test'
+@app.route('/test27')
+def test27():
+    _test27()
+    return 'test'
+@cache.cached(timeout=3)
+def _test28():
+    return 'test'
+@app.route('/test28')
+def test28():
+    _test28()
+    return 'test'
+@cache.cached(timeout=3)
+def _test29():
+    return 'test'
+@app.route('/test29')
+def test29():
+    _test29()
+    return 'test'
+@cache.cached(timeout=3)
+def _test30():
+    return 'test'
+@app.route('/test30')
+def test30():
+    _test30()
+    return 'test'
+
 
 if __name__ == "__main__":
     app.run('0.0.0.0', 5000)
