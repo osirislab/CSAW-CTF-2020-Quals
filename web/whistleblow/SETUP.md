@@ -32,8 +32,8 @@ Give access only to the IAM user with S3 read priviledge created earlier.
 It is now configured only for access in an Ohio-based EC2 instance, with the proper credentials. Create a new presigned URL for distribution
 
 ```
-$ aws s3 presign s3://super-top-secret-dont-look/.sorry/.for/.nothing/flag.txt --expires-in 180000
-https://super-top-secret-dont-look.s3.amazonaws.com/.sorry/.for/.nothing/flag.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQHTF3NZUVXKMS6HL%2F20200831%2Fus-east-2%2Fs3%2Faws4_request&X-Amz-Date=20200831T020639Z&X-Amz-Expires=18000&X-Amz-SignedHeaders=host&X-Amz-Signature=515ad736e5f2068b2605be97e2ced10e23fb993fbadcc697f522564e2e0d3386
+$ aws s3 presign s3://super-top-secret-dont-look/.sorry/.for/.nothing/flag.txt --expires-in 604800
+https://super-top-secret-dont-look.s3.us-east-2.amazonaws.com/.sorry/.for/.nothing/flag.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQHTF3NZUTQBCUQCK%2F20200909%2Fus-east-2%2Fs3%2Faws4_request&X-Amz-Date=20200909T195323Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=3560cef4b02815e7c5f95f1351c1146c8eeeb7ae0aff0adc5c106f6488db5b6b
 ```
 
 
