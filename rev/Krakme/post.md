@@ -33,7 +33,7 @@ __global__ void checkKernel(const char* passwd, const int* size, int* result) {
 ```
 ## The Solve
 Why the counter? Why not stop the comparisons if a byte was off? I was just being cautious, timing attack ain't possible. Now you wouldn't have this source, what you could get is, well first just looking at the sections in the PE binary you could see that there are ".nv_fatb" and "nvFatBi" sections, a quick goolging and you realize it is cuda stuff. Next thing is, if you look at the [cuda toolkit](https://developer.nvidia.com/cuda-toolkit), a quick delve into the documentations, and you know what you have to do, in fact if you happen to land on [this page](https://docs.nvidia.com/cuda/cuda-binary-utilities/index.html) of the docs everything would click: in the PE binary, those nv sections hold code in an IL called [PTX](https://docs.nvidia.com/cuda/parallel-thread-execution/index.html), which is this ISA by nvidia which the gpu understands. So the kernel code gets compiled into PTX, and gets tucked into the PE, the task which would be supereasy where it in plain x86 now becomes harder and partly it is just _security by obsecurity_ because unlike x86, PTX docs are really bad, and there isn't much tutorials and info on them. Still the kernel is simple, and given the PTX code and looking through the awful nvidia docs, you would get it. <br>
-The ISA has many nuts and bolts that are irelevant to us as in this challenge no parallelism is used, we only have a single gpu thread running. Another feature of the ISA are the predicate registers: these are 1 bit registers holding predicates and then you can later use them prefixed to an instruction to make that instruction executed or skipped, based on the value of the predicate. For example lets dissect an instuction like:
+The ISA has many nuts and bolts that are irrelevant to us as in this challenge no parallelism is used, we only have a single gpu thread running. Another feature of the ISA are the predicate registers: these are 1 bit registers holding predicates and then you can later use them prefixed to an instruction to make that instruction executed or skipped, based on the value of the predicate. For example lets dissect an instruction like:
  ```
  setp.eq.s32	%p1, %r1, %r2;
  ```
@@ -56,3 +56,6 @@ And who know what awaits in [blips and chitz](https://rickandmorty.fandom.com/wi
       width="600"
     />
 </p>
+
+## Acknowledgement
+Thanks to John, Alan and Swathi for the feedback, erratum and as always encouragement.
